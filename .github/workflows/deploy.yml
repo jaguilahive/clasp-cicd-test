@@ -1,20 +1,28 @@
 name: Deploy GAS
 on:
   push:
-    branches: [test-ci] # safe bracnh test
+    branches: [test-ci]
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        uses: actions/setup-node@v3
-        with: { node-version: "24" }
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
       - name: Auth as company account
         run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
 
-      - name: Verify auth (debug)
-        run: npx @google/clasp@3.3.0 whoami login --status
+      - name: Verify creds file exists
+        run: |
+          if [ -s ~/.clasprc.json ]; then
+            echo "Creds file present."
+          else
+            echo "Creds file MISSING or empty — check CLASPRC_JSON secret."
+            exit 1
+          fi
 
       - name: Point at target project
         run: echo '${{ secrets.CLASP_JSON_TEST }}' > .clasp.json
