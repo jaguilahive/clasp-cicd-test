@@ -1,0 +1,25 @@
+name: Deploy GAS
+on:
+  push:
+    branches: [test-ci] # safe bracnh test
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Auth as company account
+        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+
+      - name: Verify auth (debug)
+        run: npx @google/clasp@3.3.0 whoami login --status
+
+      - name: Point at target project
+        run: echo '${{ secrets.CLASP_JSON_TEST }}' > .clasp.json
+
+      - name: Push
+        run: npx @google/clasp@3.3.0 push --force
